@@ -233,6 +233,32 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
               ),
               const SizedBox(height: 24),
 
+              // ATTACHMENT (placeholder — not wired to storage yet)
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('File upload coming soon')),
+                  ),
+                  icon: Icon(Icons.upload_file_rounded,
+                      size: 20, color: colors.primary),
+                  label: Text(
+                    'Attach Receipt / File',
+                    style: AppTextStyles.text
+                        .copyWith(fontWeight: FontWeight.w700),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: colors.primary,
+                    side: BorderSide(
+                        color: colors.primary.withValues(alpha: 0.4)),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+
               // SAVE
               SizedBox(
                 height: 48,

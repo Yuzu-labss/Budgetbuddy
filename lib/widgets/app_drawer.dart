@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../config/theme.dart';
+import '../features/about/screens/about_screen.dart';
 import '../providers/auth_provider.dart';
 import '../providers/theme_controller.dart';
 
@@ -76,8 +77,14 @@ class AppDrawer extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            _tile(icon: Icons.help_outline_rounded, label: 'FAQ'),
-            _tile(icon: Icons.info_outline_rounded, label: 'About'),
+            _tile(
+              icon: Icons.info_outline_rounded,
+              label: 'About',
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AboutScreen()),
+              ),
+            ),
             SwitchListTile(
               secondary: Icon(
                 Icons.dark_mode_outlined,
@@ -120,7 +127,11 @@ class AppDrawer extends StatelessWidget {
     );
   }
 
-  Widget _tile({required IconData icon, required String label}) {
+  Widget _tile({
+    required IconData icon,
+    required String label,
+    VoidCallback? onTap,
+  }) {
     return Builder(
       builder: (context) {
         final c = context.colors;
@@ -134,7 +145,10 @@ class AppDrawer extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
-          onTap: () => Navigator.pop(context),
+          onTap: () {
+            Navigator.pop(context); // close drawer
+            onTap?.call();
+          },
         );
       },
     );
