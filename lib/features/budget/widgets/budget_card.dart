@@ -5,14 +5,14 @@ class BudgetCard extends StatelessWidget {
   final String period;
   final double budget;
   final double spent;
-  final VoidCallback onEdit;
+  final VoidCallback? onEdit;
 
   const BudgetCard({
     super.key,
     required this.period,
     required this.budget,
     required this.spent,
-    required this.onEdit,
+    this.onEdit,
   });
 
   String _peso(double v) => '₱${v.toStringAsFixed(2)}';
@@ -69,30 +69,40 @@ class BudgetCard extends StatelessWidget {
                 color: c.textSecondary,
                 fontSize: 12,
               ),
-            ),
-          const SizedBox(height: 10),
-          Align(
-            alignment: Alignment.centerRight,
-            child: SizedBox(
-              height: 32,
-              child: ElevatedButton(
-                onPressed: onEdit,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: c.expense,
-                  foregroundColor: c.onAccent,
-                  elevation: 0,
-                  minimumSize: const Size(0, 32),
-                  padding: const EdgeInsets.symmetric(horizontal: 22),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  textStyle: AppTextStyles.text
-                      .copyWith(fontWeight: FontWeight.w700),
-                ),
-                child: Text(hasBudget ? 'Edit' : 'Set'),
+            )
+          else if (spent > 0)
+            Text(
+              'Spent ${_peso(spent)}',
+              style: AppTextStyles.text.copyWith(
+                color: c.textSecondary,
+                fontSize: 12,
               ),
             ),
-          ),
+          if (onEdit != null) ...[
+            const SizedBox(height: 10),
+            Align(
+              alignment: Alignment.centerRight,
+              child: SizedBox(
+                height: 32,
+                child: ElevatedButton(
+                  onPressed: onEdit,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: c.expense,
+                    foregroundColor: c.onAccent,
+                    elevation: 0,
+                    minimumSize: const Size(0, 32),
+                    padding: const EdgeInsets.symmetric(horizontal: 22),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    textStyle: AppTextStyles.text
+                        .copyWith(fontWeight: FontWeight.w700),
+                  ),
+                  child: Text(hasBudget ? 'Edit' : 'Set'),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
