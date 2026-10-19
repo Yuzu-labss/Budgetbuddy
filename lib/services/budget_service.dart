@@ -1,20 +1,23 @@
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../config/constants.dart';
 import '../models/budget.dart';
+import 'database_service.dart';
 
-/// Persists a user's budget locally. (Future step: move to Firestore.)
+/// Persists a user's budget in Firestore under `users/{uid}/budgets/current`,
+/// so every account owns its own budget within the shared Firebase project.
 class BudgetService {
-  String _key(String uid) => 'budget_$uid';
+  BudgetService({DatabaseService? database})
+    : _db = database ?? DatabaseService();
+
+  final DatabaseService _db;
 
   Future<Budget> getBudget(String uid) async {
-    final prefs = await SharedPreferences.getInstance();
-    final text = prefs.getString(_key(uid));
-    if (text == null) return const Budget();
-    return Budget.fromMap(jsonDecode(text) as Map<String, dynamic>);
+    final snap = await _db.budgetsRef(uid).doc(kBudgetDocId).get();
+    final data = snap.data();
+    if (!snap.exists || data == null) return const Budget();
+    return Budget.fromMap(data);
   }
 
   Future<void> saveBudget(String uid, Budget budget) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_key(uid), jsonEncode(budget.toMap()));
+    await _db.budgetsRef(uid).doc(kBudgetDocId).set(budget.toMap());
   }
 }

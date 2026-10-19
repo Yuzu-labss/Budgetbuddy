@@ -19,6 +19,11 @@ const int kMinPasswordLength = 6;
 const String kUsersCollection = 'users';
 const String kBudgetsCollection = 'budgets';
 const String kExpensesCollection = 'expenses';
+const String kSettingsCollection = 'settings';
+
+// Fixed document ids within a user's subcollections
+const String kBudgetDocId = 'current';
+const String kSettingsDocId = 'preferences';
 
 // Currency
 const String kCurrencySymbol = '₱';

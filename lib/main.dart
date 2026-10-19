@@ -25,9 +25,14 @@ class BudgetBuddyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => ThemeController()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
-        // Budget & expense providers follow the authenticated user's uid.
+        // Theme, budget & expense providers all follow the authenticated uid,
+        // so each account keeps its own data in Firestore.
+        ChangeNotifierProxyProvider<AuthProvider, ThemeController>(
+          create: (_) => ThemeController(),
+          update: (_, auth, theme) =>
+              (theme ?? ThemeController())..start(auth.user?.uid),
+        ),
         ChangeNotifierProxyProvider<AuthProvider, BudgetProvider>(
           create: (_) => BudgetProvider(),
           update: (_, auth, budget) =>

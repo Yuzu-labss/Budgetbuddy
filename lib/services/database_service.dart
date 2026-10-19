@@ -17,4 +17,8 @@ class DatabaseService {
 
   CollectionReference<Map<String, dynamic>> expensesRef(String uid) =>
       userRef(uid).collection(kExpensesCollection);
+
+  /// Single per-user settings document (`users/{uid}/settings/preferences`).
+  DocumentReference<Map<String, dynamic>> settingsRef(String uid) =>
+      userRef(uid).collection(kSettingsCollection).doc(kSettingsDocId);
 }

@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../config/constants.dart';
 import '../models/app_user.dart';
+import '../models/budget.dart';
 import 'database_service.dart';
 
 class AuthException implements Exception {
@@ -45,6 +47,19 @@ class AuthService {
       );
 
       await _database.userRef(appUser.uid).set(appUser.toMap());
+
+      // Best-effort seed of the per-user budget doc so the account owns its
+      // budget record in Firestore from the start. A missing doc simply falls
+      // back to defaults on first read, so a failure here must not block sign-up.
+      try {
+        await _database
+            .budgetsRef(appUser.uid)
+            .doc(kBudgetDocId)
+            .set(const Budget().toMap());
+      } on FirebaseException {
+        // Ignore: BudgetService.getBudget returns defaults when absent.
+      }
+
       return appUser;
     } on FirebaseAuthException catch (e) {
       throw AuthException(_messageFor(e.code, e.message));

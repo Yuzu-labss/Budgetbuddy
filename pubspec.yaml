@@ -44,8 +44,6 @@ dependencies:
   google_fonts: ^8.2.1
   # Dashboard charts (dashboard project)
   fl_chart: ^1.2.0
-  # Local persistence (budget project)
-  shared_preferences: ^2.5.6
   # Formatting
   intl: ^0.20.3
 
