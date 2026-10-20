@@ -132,7 +132,9 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
             child: Text(
               'Save',
               style: AppTextStyles.text.copyWith(
-                color: _accent(context),
+                // Acceptance action: always green regardless of the active
+                // (monochromatic) theme or whether this is income/expense.
+                color: colors.success,
                 fontWeight: FontWeight.w700,
               ),
             ),

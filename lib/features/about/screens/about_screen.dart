@@ -102,8 +102,8 @@ class AboutScreen extends StatelessWidget {
               ),
               _feature(
                 context,
-                Icons.dark_mode_outlined,
-                'Switch between light and dark mode',
+                Icons.palette_outlined,
+                'Choose from five colour themes',
               ),
             ],
           ),

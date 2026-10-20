@@ -48,9 +48,9 @@ class BudgetBuddyApp extends StatelessWidget {
         builder: (context, theme, _) => MaterialApp(
           title: kAppName,
           debugShowCheckedModeBanner: false,
-          theme: AppTheme.light,
-          darkTheme: AppTheme.dark,
-          themeMode: theme.mode,
+          // A single, fully-built theme drives the whole app; its brightness is
+          // baked in per ThemeKind, so no separate darkTheme/themeMode needed.
+          theme: AppTheme.forKind(theme.kind),
           home: const SplashScreen(),
           routes: AppRoutes.routes,
         ),

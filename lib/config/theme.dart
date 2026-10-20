@@ -18,14 +18,14 @@ import 'constants.dart';
 /// Container(color: c.background, ...)
 /// Text('Hi', style: AppTextStyles.title.copyWith(color: c.onBanner));
 /// ```
-/// `context.colors` resolves to the LIGHT or DARK value automatically based on
-/// the active [ThemeMode], so toggling dark mode repaints the whole app.
+/// `context.colors` resolves to the value of the active [ThemeKind] (one of
+/// five skins), so switching themes repaints the whole app.
 ///
 /// ADDING / CHANGING A COLOUR
 /// --------------------------
 /// 1. Add the raw value ONCE to [AppPalette] (the normalized hex registry).
-/// 2. Expose it as a semantic role on [AppColors], giving it BOTH a light and a
-///    dark value in [AppColors.light] / [AppColors.dark].
+/// 2. Expose it as a semantic role on [AppColors], giving it a value in EACH of
+///    the five instances (cleanWhite / midnight / sage / azure / scarlet).
 /// 3. Consume it through `context.colors.<role>` — never reference the raw hex.
 ///
 /// Most widgets (AppBar, Card, Dialog, inputs, buttons, navigation, chips …)
@@ -48,55 +48,112 @@ class AppPalette {
   static const Color black = Color(0xFF000000);
   static const Color white = Color(0xFFFFFFFF);
 
-  // Brand greens
-  static const Color moss = Color(0xFF637D65); // primary (light)
-  static const Color sage = Color(0xFF8FAF8A); // primary (dark) / secondary
-  static const Color pine = Color(0xFF3A493B); // banner (light)
-  static const Color pineDark = Color(0xFF2E4034); // banner (dark)
-  static const Color forest = Color(0xFF26352B); // deepest green / text (light)
-  static const Color deepPine = Color(0xFF35463A); // secondary text (light)
-  static const Color mint = Color(0xFFB8D5AE); // cards / muted light text
+  // -- Clean White (neutral grayscale monochrome) --------------------------
+  static const Color cwBackground = Color(0xFFFFFFFF);
+  static const Color cwSurface = Color(0xFFF6F6F8);
+  static const Color cwSurfaceVariant = Color(0xFFEDEDF0);
+  static const Color cwCard = Color(0xFFF2F2F5);
+  static const Color cwBanner = Color(0xFF33333A);
+  static const Color cwInputFill = Color(0xFFFFFFFF);
+  static const Color cwTextPrimary = Color(0xFF1C1C22);
+  static const Color cwTextSecondary = Color(0xFF6C6C76);
+  static const Color cwTextDisabled = Color(0xFFB2B2BA);
+  static const Color cwOnBannerMuted = Color(0xFFB9B9C2);
+  static const Color cwPrimary = Color(0xFF43434C);
+  static const Color cwSecondary = Color(0xFF8A8A93);
+  static const Color cwAccent = Color(0xFFE3E3E8);
 
-  // Creams (light surfaces)
-  static const Color cream = Color(0xFFE0D5BD); // background (light)
-  static const Color warmCream = Color(0xFFF3DCAA); // surface / accent (light)
-  static const Color sand = Color(0xFFD7D4B7); // surface variant (light)
+  // -- Midnight (near-black monochrome) ------------------------------------
+  static const Color mdBackground = Color(0xFF000000);
+  static const Color mdSurface = Color(0xFF0E0E11);
+  static const Color mdSurfaceVariant = Color(0xFF1B1B20);
+  static const Color mdCard = Color(0xFF141418);
+  static const Color mdBanner = Color(0xFF0C0C0F);
+  static const Color mdInputFill = Color(0xFF1B1B20);
+  static const Color mdTextPrimary = Color(0xFFF2F2F4);
+  static const Color mdTextSecondary = Color(0xFFA2A2AB);
+  static const Color mdTextDisabled = Color(0xFF5C5C64);
+  static const Color mdOnBannerMuted = Color(0xFF9A9AA3);
+  static const Color mdPrimary = Color(0xFFE6E6EA);
+  static const Color mdSecondary = Color(0xFF8C8C95);
+  static const Color mdAccent = Color(0xFFC9C9D0);
 
-  // Dark surfaces
-  static const Color ink = Color(0xFF18211C); // background (dark)
-  static const Color charcoal = Color(0xFF22302A); // card / input fill (dark)
-  static const Color slate = Color(0xFF33453A); // surface variant (dark)
-  static const Color shadow = Color(0xFF292828);
+  // -- Sage Green (green monochrome) ---------------------------------------
+  static const Color sgBackground = Color(0xFFEEF2EA);
+  static const Color sgSurface = Color(0xFFE1E9DB);
+  static const Color sgSurfaceVariant = Color(0xFFD2DCCA);
+  static const Color sgCard = Color(0xFFDDE6D6);
+  static const Color sgBanner = Color(0xFF5C7A58);
+  static const Color sgInputFill = Color(0xFFF6F9F3);
+  static const Color sgTextPrimary = Color(0xFF2E3F2D);
+  static const Color sgTextSecondary = Color(0xFF556B54);
+  static const Color sgTextDisabled = Color(0xFF9BAA98);
+  static const Color sgOnBanner = Color(0xFFF2F6EF);
+  static const Color sgOnBannerMuted = Color(0xFFCEDCC8);
+  static const Color sgPrimary = Color(0xFF7C9A78);
+  static const Color sgSecondary = Color(0xFFA7C0A1);
+  static const Color sgAccent = Color(0xFFBFDCB9);
 
-  // Disabled / muted
-  static const Color disabledLight = Color(0xFF93A094);
-  static const Color disabledDark = Color(0xFF6E7C6F);
+  // -- Azure Blue (blue monochrome) ----------------------------------------
+  static const Color azBackground = Color(0xFFEAF2FB);
+  static const Color azSurface = Color(0xFFDDEAF7);
+  static const Color azSurfaceVariant = Color(0xFFCFE1F3);
+  static const Color azCard = Color(0xFFD9E8F7);
+  static const Color azBanner = Color(0xFF2C6BA8);
+  static const Color azInputFill = Color(0xFFF5F9FE);
+  static const Color azTextPrimary = Color(0xFF17374F);
+  static const Color azTextSecondary = Color(0xFF45657F);
+  static const Color azTextDisabled = Color(0xFF93A9BC);
+  static const Color azOnBanner = Color(0xFFEAF2FB);
+  static const Color azOnBannerMuted = Color(0xFFBBD3E8);
+  static const Color azPrimary = Color(0xFF3E86C6);
+  static const Color azSecondary = Color(0xFF7FAED8);
+  static const Color azAccent = Color(0xFFBBD7EF);
 
-  // Status & money
-  static const Color error = Color(0xFFFB372E);
-  static const Color errorDark = Color(0xFFFF6F61);
-  static const Color success = Color(0xFF21CC21);
-  static const Color income = Color(0xFF82B58A);
-  static const Color expense = Color(0xFFD98289);
+  // -- Scarlet Red (soft red monochrome) -----------------------------------
+  static const Color scBackground = Color(0xFFFBEDEC);
+  static const Color scSurface = Color(0xFFF7E2E0);
+  static const Color scSurfaceVariant = Color(0xFFF2D3D0);
+  static const Color scCard = Color(0xFFF6DEDB);
+  static const Color scBanner = Color(0xFFA8473E);
+  static const Color scInputFill = Color(0xFFFEF6F5);
+  static const Color scTextPrimary = Color(0xFF5A2A25);
+  static const Color scTextSecondary = Color(0xFF8A5751);
+  static const Color scTextDisabled = Color(0xFFC2A09C);
+  static const Color scOnBanner = Color(0xFFFBEDEB);
+  static const Color scOnBannerMuted = Color(0xFFEFC7C2);
+  static const Color scPrimary = Color(0xFFC4685E);
+  static const Color scSecondary = Color(0xFFDB9C94);
+  static const Color scAccent = Color(0xFFEFC1BA);
 
-  // Category accents (charts / chips)
-  static const Color catYellow = Color(0xFFE6C779);
-  static const Color catPurple = Color(0xFFB9A2E8);
-  static const Color catBlue = Color(0xFF88B9E0);
+  // -- Shared status & money ------------------------------------------------
+  // These deliberately KEEP their hue across every (monochromatic) theme so a
+  // "yes" always reads green (acceptance) and a "no"/destructive action always
+  // reads red (rejection).
+  static const Color success = Color(0xFF2E9E5B); // acceptance (light themes)
+  static const Color successDark = Color(0xFF57C98A); // acceptance (midnight)
+  static const Color income = Color(0xFF4CAF7D);
+  static const Color expense = Color(0xFFE08484);
+  static const Color error = Color(0xFFD6483F); // rejection (light themes)
+  static const Color errorMidnight = Color(0xFFFF6F61); // rejection (midnight)
+  static const Color errorScarlet = Color(0xFFB3271E); // deeper, distinct red
+  static const Color onErrorLight = Color(0xFFFFFFFF);
+  static const Color onErrorDark = Color(0xFF1A0B0A);
 
-  // Hairlines (pre-composed alpha so they can stay const)
-  static const Color dividerLight = Color(0x1F26352B); // forest @ ~12%
-  static const Color dividerDark = Color(0x1FE0D5BD); // cream @ ~12%
-  static const Color borderLight = Color(0x2626352B); // forest @ ~15%
-  static const Color borderDark = Color(0x26E0D5BD); // cream @ ~15%
+  // -- Hairlines (pre-composed alpha so they can stay const) ----------------
+  static const Color dividerOnLight = Color(0x1A000000); // black @ ~10%
+  static const Color borderOnLight = Color(0x26000000); // black @ ~15%
+  static const Color dividerOnDark = Color(0x1FFFFFFF); // white @ ~12%
+  static const Color borderOnDark = Color(0x29FFFFFF); // white @ ~16%
+  static const Color shadow = Color(0xFF000000);
 }
 
 /// ---------------------------------------------------------------------------
 /// AppColors — the semantic, theme-aware colour roles.
 ///
-/// This is a [ThemeExtension], registered on both [AppTheme.light] and
-/// [AppTheme.dark]. Widgets read it with `context.colors.<role>`; the correct
-/// light/dark value is supplied automatically and animates on theme change.
+/// This is a [ThemeExtension], registered on every theme built by
+/// [AppTheme.forKind]. Widgets read it with `context.colors.<role>`; the value
+/// for the active [ThemeKind] is supplied automatically and animates on change.
 /// ---------------------------------------------------------------------------
 @immutable
 class AppColors extends ThemeExtension<AppColors> {
@@ -191,82 +248,199 @@ class AppColors extends ThemeExtension<AppColors> {
   /// Ordered palette for charts (pie / bars / legend dots).
   final List<Color> chartPalette;
 
-  // -- Light & dark instances ------------------------------------------------
-  static const AppColors light = AppColors(
-    background: AppPalette.cream,
-    surface: AppPalette.warmCream,
-    surfaceVariant: AppPalette.sand,
-    card: AppPalette.mint,
-    banner: AppPalette.pine,
-    inputFill: AppPalette.white,
-    textPrimary: AppPalette.forest,
-    textSecondary: AppPalette.deepPine,
-    textDisabled: AppPalette.disabledLight,
-    onBanner: AppPalette.cream,
-    onBannerMuted: AppPalette.mint,
+  // -- Theme instances ------------------------------------------------------
+  // Five monochromatic skins. Status/money colours (success, error, income,
+  // expense) intentionally keep their hue in every theme so yes/no semantics
+  // stay readable.
+
+  /// Clean White — a simple, neutral light layout (grayscale monochrome).
+  static const AppColors cleanWhite = AppColors(
+    background: AppPalette.cwBackground,
+    surface: AppPalette.cwSurface,
+    surfaceVariant: AppPalette.cwSurfaceVariant,
+    card: AppPalette.cwCard,
+    banner: AppPalette.cwBanner,
+    inputFill: AppPalette.cwInputFill,
+    textPrimary: AppPalette.cwTextPrimary,
+    textSecondary: AppPalette.cwTextSecondary,
+    textDisabled: AppPalette.cwTextDisabled,
+    onBanner: AppPalette.white,
+    onBannerMuted: AppPalette.cwOnBannerMuted,
     onPrimary: AppPalette.white,
-    onAccent: AppPalette.forest,
-    primary: AppPalette.moss,
-    secondary: AppPalette.sage,
-    accent: AppPalette.warmCream,
+    onAccent: AppPalette.cwTextPrimary,
+    primary: AppPalette.cwPrimary,
+    secondary: AppPalette.cwSecondary,
+    accent: AppPalette.cwAccent,
     error: AppPalette.error,
-    onError: AppPalette.white,
+    onError: AppPalette.onErrorLight,
     success: AppPalette.success,
     income: AppPalette.income,
     expense: AppPalette.expense,
-    divider: AppPalette.dividerLight,
-    border: AppPalette.borderLight,
+    divider: AppPalette.dividerOnLight,
+    border: AppPalette.borderOnLight,
     shadow: AppPalette.shadow,
-    disabled: AppPalette.disabledLight,
+    disabled: AppPalette.cwTextDisabled,
     chartPalette: <Color>[
-      AppPalette.moss,
-      AppPalette.mint,
-      AppPalette.expense,
-      AppPalette.warmCream,
-      AppPalette.forest,
-      AppPalette.catBlue,
-      AppPalette.catPurple,
-      AppPalette.catYellow,
+      AppPalette.cwBanner,
+      AppPalette.cwPrimary,
+      AppPalette.cwSecondary,
+      AppPalette.cwTextDisabled,
+      AppPalette.cwAccent,
+      AppPalette.cwSurfaceVariant,
     ],
   );
 
-  static const AppColors dark = AppColors(
-    background: AppPalette.ink,
-    surface: AppPalette.forest,
-    surfaceVariant: AppPalette.slate,
-    card: AppPalette.charcoal,
-    banner: AppPalette.pineDark,
-    inputFill: AppPalette.charcoal,
-    textPrimary: AppPalette.cream,
-    textSecondary: AppPalette.mint,
-    textDisabled: AppPalette.disabledDark,
-    onBanner: AppPalette.cream,
-    onBannerMuted: AppPalette.mint,
-    onPrimary: AppPalette.ink,
-    onAccent: AppPalette.forest,
-    primary: AppPalette.sage,
-    secondary: AppPalette.moss,
-    accent: AppPalette.warmCream,
-    error: AppPalette.errorDark,
-    onError: AppPalette.ink,
+  /// Midnight — a really dark theme with a true black background.
+  static const AppColors midnight = AppColors(
+    background: AppPalette.mdBackground,
+    surface: AppPalette.mdSurface,
+    surfaceVariant: AppPalette.mdSurfaceVariant,
+    card: AppPalette.mdCard,
+    banner: AppPalette.mdBanner,
+    inputFill: AppPalette.mdInputFill,
+    textPrimary: AppPalette.mdTextPrimary,
+    textSecondary: AppPalette.mdTextSecondary,
+    textDisabled: AppPalette.mdTextDisabled,
+    onBanner: AppPalette.mdTextPrimary,
+    onBannerMuted: AppPalette.mdOnBannerMuted,
+    onPrimary: AppPalette.black,
+    onAccent: AppPalette.black,
+    primary: AppPalette.mdPrimary,
+    secondary: AppPalette.mdSecondary,
+    accent: AppPalette.mdAccent,
+    error: AppPalette.errorMidnight,
+    onError: AppPalette.onErrorDark,
+    success: AppPalette.successDark,
+    income: AppPalette.income,
+    expense: AppPalette.expense,
+    divider: AppPalette.dividerOnDark,
+    border: AppPalette.borderOnDark,
+    shadow: AppPalette.black,
+    disabled: AppPalette.mdTextDisabled,
+    chartPalette: <Color>[
+      AppPalette.mdPrimary,
+      AppPalette.mdAccent,
+      AppPalette.mdSecondary,
+      AppPalette.mdTextSecondary,
+      AppPalette.mdTextDisabled,
+      AppPalette.mdSurfaceVariant,
+    ],
+  );
+
+  /// Sage Green — the classic green skin (browns/creams replaced with sage).
+  static const AppColors sage = AppColors(
+    background: AppPalette.sgBackground,
+    surface: AppPalette.sgSurface,
+    surfaceVariant: AppPalette.sgSurfaceVariant,
+    card: AppPalette.sgCard,
+    banner: AppPalette.sgBanner,
+    inputFill: AppPalette.sgInputFill,
+    textPrimary: AppPalette.sgTextPrimary,
+    textSecondary: AppPalette.sgTextSecondary,
+    textDisabled: AppPalette.sgTextDisabled,
+    onBanner: AppPalette.sgOnBanner,
+    onBannerMuted: AppPalette.sgOnBannerMuted,
+    onPrimary: AppPalette.white,
+    onAccent: AppPalette.sgTextPrimary,
+    primary: AppPalette.sgPrimary,
+    secondary: AppPalette.sgSecondary,
+    accent: AppPalette.sgAccent,
+    error: AppPalette.error,
+    onError: AppPalette.onErrorLight,
     success: AppPalette.success,
     income: AppPalette.income,
     expense: AppPalette.expense,
-    divider: AppPalette.dividerDark,
-    border: AppPalette.borderDark,
-    shadow: AppPalette.black,
-    disabled: AppPalette.disabledDark,
+    divider: AppPalette.dividerOnLight,
+    border: AppPalette.borderOnLight,
+    shadow: AppPalette.shadow,
+    disabled: AppPalette.sgTextDisabled,
     chartPalette: <Color>[
-      AppPalette.sage,
-      AppPalette.mint,
-      AppPalette.expense,
-      AppPalette.warmCream,
-      AppPalette.pine,
-      AppPalette.catBlue,
-      AppPalette.catPurple,
-      AppPalette.catYellow,
+      AppPalette.sgBanner,
+      AppPalette.sgPrimary,
+      AppPalette.sgSecondary,
+      AppPalette.sgAccent,
+      AppPalette.sgSurfaceVariant,
+      AppPalette.sgTextPrimary,
     ],
   );
+
+  /// Azure Blue — a cool, bluish monochrome skin.
+  static const AppColors azure = AppColors(
+    background: AppPalette.azBackground,
+    surface: AppPalette.azSurface,
+    surfaceVariant: AppPalette.azSurfaceVariant,
+    card: AppPalette.azCard,
+    banner: AppPalette.azBanner,
+    inputFill: AppPalette.azInputFill,
+    textPrimary: AppPalette.azTextPrimary,
+    textSecondary: AppPalette.azTextSecondary,
+    textDisabled: AppPalette.azTextDisabled,
+    onBanner: AppPalette.azOnBanner,
+    onBannerMuted: AppPalette.azOnBannerMuted,
+    onPrimary: AppPalette.white,
+    onAccent: AppPalette.azTextPrimary,
+    primary: AppPalette.azPrimary,
+    secondary: AppPalette.azSecondary,
+    accent: AppPalette.azAccent,
+    error: AppPalette.error,
+    onError: AppPalette.onErrorLight,
+    success: AppPalette.success,
+    income: AppPalette.income,
+    expense: AppPalette.expense,
+    divider: AppPalette.dividerOnLight,
+    border: AppPalette.borderOnLight,
+    shadow: AppPalette.shadow,
+    disabled: AppPalette.azTextDisabled,
+    chartPalette: <Color>[
+      AppPalette.azBanner,
+      AppPalette.azPrimary,
+      AppPalette.azSecondary,
+      AppPalette.azAccent,
+      AppPalette.azSurfaceVariant,
+      AppPalette.azTextPrimary,
+    ],
+  );
+
+  /// Scarlet Red — a soft, easy-on-the-eyes red monochrome skin.
+  static const AppColors scarlet = AppColors(
+    background: AppPalette.scBackground,
+    surface: AppPalette.scSurface,
+    surfaceVariant: AppPalette.scSurfaceVariant,
+    card: AppPalette.scCard,
+    banner: AppPalette.scBanner,
+    inputFill: AppPalette.scInputFill,
+    textPrimary: AppPalette.scTextPrimary,
+    textSecondary: AppPalette.scTextSecondary,
+    textDisabled: AppPalette.scTextDisabled,
+    onBanner: AppPalette.scOnBanner,
+    onBannerMuted: AppPalette.scOnBannerMuted,
+    onPrimary: AppPalette.white,
+    onAccent: AppPalette.scTextPrimary,
+    primary: AppPalette.scPrimary,
+    secondary: AppPalette.scSecondary,
+    accent: AppPalette.scAccent,
+    error: AppPalette.errorScarlet,
+    onError: AppPalette.onErrorLight,
+    success: AppPalette.success,
+    income: AppPalette.income,
+    expense: AppPalette.expense,
+    divider: AppPalette.dividerOnLight,
+    border: AppPalette.borderOnLight,
+    shadow: AppPalette.shadow,
+    disabled: AppPalette.scTextDisabled,
+    chartPalette: <Color>[
+      AppPalette.scBanner,
+      AppPalette.scPrimary,
+      AppPalette.scSecondary,
+      AppPalette.scAccent,
+      AppPalette.scSurfaceVariant,
+      AppPalette.scTextPrimary,
+    ],
+  );
+
+  /// Backwards-compatible aliases used by the [of] brightness fallback.
+  static AppColors get light => cleanWhite;
+  static AppColors get dark => midnight;
 
   /// Look up the active [AppColors] from the nearest [Theme].
   static AppColors of(BuildContext context) {
@@ -274,10 +448,10 @@ class AppColors extends ThemeExtension<AppColors> {
     final colors = theme.extension<AppColors>();
     assert(
       colors != null,
-      'AppColors is not registered on the current ThemeData. Use AppTheme.light/dark.',
+      'AppColors is not registered on the current ThemeData. Use AppTheme.forKind().',
     );
     return colors ??
-        (theme.brightness == Brightness.dark ? AppColors.dark : AppColors.light);
+        (theme.brightness == Brightness.dark ? midnight : cleanWhite);
   }
 
   @override
@@ -447,15 +621,69 @@ class AppTextStyles {
 }
 
 /// ---------------------------------------------------------------------------
-/// AppTheme — builds the light and dark [ThemeData], wiring the [AppColors]
-/// extension and every component theme. [light] is the default; [dark] is
-/// toggled from the drawer via ThemeController.
+/// ThemeKind — the five selectable skins.
+///
+/// Each maps 1:1 to an [AppColors] instance and a [Brightness]. The value is
+/// persisted per user (see ThemeController / SettingsService) by its [name].
+/// ---------------------------------------------------------------------------
+enum ThemeKind { cleanWhite, midnight, sage, azure, scarlet }
+
+extension ThemeKindX on ThemeKind {
+  /// Human-readable name shown in the theme picker.
+  String get label => switch (this) {
+    ThemeKind.cleanWhite => 'Clean White',
+    ThemeKind.midnight => 'Midnight',
+    ThemeKind.sage => 'Sage Green',
+    ThemeKind.azure => 'Azure Blue',
+    ThemeKind.scarlet => 'Scarlet Red',
+  };
+
+  /// The prominent colour used to render this theme's picker circle.
+  Color get swatch => switch (this) {
+    ThemeKind.cleanWhite => AppPalette.white,
+    ThemeKind.midnight => AppPalette.black,
+    ThemeKind.sage => AppPalette.sgPrimary,
+    ThemeKind.azure => AppPalette.azPrimary,
+    ThemeKind.scarlet => AppPalette.scPrimary,
+  };
+
+  /// The semantic palette for this skin.
+  AppColors get colors => switch (this) {
+    ThemeKind.cleanWhite => AppColors.cleanWhite,
+    ThemeKind.midnight => AppColors.midnight,
+    ThemeKind.sage => AppColors.sage,
+    ThemeKind.azure => AppColors.azure,
+    ThemeKind.scarlet => AppColors.scarlet,
+  };
+
+  /// Base brightness driving the ColorScheme / status-bar styling.
+  Brightness get brightness =>
+      this == ThemeKind.midnight ? Brightness.dark : Brightness.light;
+
+  bool get isDark => this == ThemeKind.midnight;
+
+  /// Resolves a persisted [name] back to a [ThemeKind], defaulting to
+  /// [ThemeKind.cleanWhite] when the value is missing or unknown.
+  static ThemeKind fromName(String? name) => ThemeKind.values.firstWhere(
+    (k) => k.name == name,
+    orElse: () => ThemeKind.cleanWhite,
+  );
+}
+
+/// ---------------------------------------------------------------------------
+/// AppTheme — builds the [ThemeData] for a given [ThemeKind], wiring the
+/// [AppColors] extension and every component theme. [forKind] is the entry
+/// point used by the app; [light]/[dark] are convenience aliases.
 /// ---------------------------------------------------------------------------
 class AppTheme {
   AppTheme._();
 
-  static ThemeData get light => _build(Brightness.light, AppColors.light);
-  static ThemeData get dark => _build(Brightness.dark, AppColors.dark);
+  /// Builds the full [ThemeData] for [kind].
+  static ThemeData forKind(ThemeKind kind) =>
+      _build(kind.brightness, kind.colors);
+
+  static ThemeData get light => forKind(ThemeKind.cleanWhite);
+  static ThemeData get dark => forKind(ThemeKind.midnight);
 
   static ThemeData _build(Brightness brightness, AppColors c) {
     final bool isDark = brightness == Brightness.dark;
