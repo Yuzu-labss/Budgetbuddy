@@ -54,6 +54,7 @@ class ExpenseProvider extends ChangeNotifier {
     required DateTime date,
     required String type,
     String notes = '',
+    String? receiptUrl,
   }) async {
     final uid = _uid;
     if (uid == null) {
@@ -70,6 +71,7 @@ class ExpenseProvider extends ChangeNotifier {
           category: category,
           date: date,
           notes: notes,
+          receiptUrl: receiptUrl,
           type: type,
         ),
       );

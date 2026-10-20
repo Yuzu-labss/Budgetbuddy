@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../config/theme.dart';
@@ -65,6 +67,32 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
 
   String _fmtDate(DateTime d) =>
       '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
+  /// Opens the stored receipt/photo in a full-screen, zoomable viewer.
+  void _openImage(File file) {
+    showDialog<void>(
+      context: context,
+      builder: (_) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(12),
+        child: Stack(
+          alignment: Alignment.topRight,
+          children: [
+            InteractiveViewer(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.file(file, fit: BoxFit.contain),
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.close_rounded, color: Colors.white),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   Future<void> _save() async {
     FocusScope.of(context).unfocus();
@@ -135,6 +163,15 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
   Widget build(BuildContext context) {
     final saving = context.watch<ExpenseProvider>().isLoading;
     final colors = context.colors;
+
+    final notes = widget.expense.notes.trim();
+    final receiptPath = widget.expense.receiptUrl;
+    final File? receiptFile =
+        (receiptPath != null &&
+                receiptPath.isNotEmpty &&
+                File(receiptPath).existsSync())
+            ? File(receiptPath)
+            : null;
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -273,6 +310,62 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
               ),
             ),
             const SizedBox(height: 28),
+            if (notes.isNotEmpty) ...[
+              Text(
+                'Notes',
+                style: AppTextStyles.text.copyWith(
+                  color: colors.textSecondary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: colors.inputFill,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Text(
+                  notes,
+                  style: AppTextStyles.title.copyWith(color: colors.textPrimary),
+                ),
+              ),
+              const SizedBox(height: 20),
+            ],
+            if (receiptFile != null) ...[
+              Text(
+                'Attachment',
+                style: AppTextStyles.text.copyWith(
+                  color: colors.textSecondary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 8),
+              GestureDetector(
+                onTap: () => _openImage(receiptFile),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(14),
+                  child: Image.file(
+                    receiptFile,
+                    width: double.infinity,
+                    height: 220,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Center(
+                child: Text(
+                  'Tap to expand',
+                  style: AppTextStyles.text.copyWith(
+                    color: colors.textSecondary,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 28),
+            ],
             SizedBox(
               height: 48,
               child: ElevatedButton(

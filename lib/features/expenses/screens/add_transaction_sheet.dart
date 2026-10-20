@@ -1,8 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 import '../../../config/theme.dart';
 import '../../../providers/expense_provider.dart';
+import '../../../services/attachment_service.dart';
 import '../../../utils/categories.dart';
 import '../../budget/widgets/budget_input_field.dart';
 
@@ -33,10 +37,12 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
   final _nameController = TextEditingController();
   final _amountController = TextEditingController();
   final _notesController = TextEditingController();
+  final _attachments = AttachmentService();
 
   bool _isIncome = false;
   String _category = Categories.food;
   DateTime _date = DateTime.now();
+  String? _attachmentPath;
 
   Color get _accent => _isIncome ? context.colors.income : context.colors.expense;
 
@@ -77,6 +83,49 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
   String _fmtDate(DateTime d) =>
       '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
+  /// Prompts for a source (camera or gallery), then stores the chosen image
+  /// inside the app and keeps its local path for saving to Firestore.
+  Future<void> _chooseAttachment() async {
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_camera_rounded),
+              title: const Text('Take Photo'),
+              onTap: () => Navigator.pop(sheetContext, ImageSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library_rounded),
+              title: const Text('Choose from Gallery'),
+              onTap: () => Navigator.pop(sheetContext, ImageSource.gallery),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (source == null || !mounted) return;
+
+    try {
+      final path = await _attachments.pickAndStore(source);
+      if (!mounted) return;
+      if (path != null) setState(() => _attachmentPath = path);
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not attach that image.')),
+      );
+    }
+  }
+
+  Future<void> _removeAttachment() async {
+    final previous = _attachmentPath;
+    setState(() => _attachmentPath = null);
+    await _attachments.delete(previous);
+  }
+
   Future<void> _save() async {
     FocusScope.of(context).unfocus();
     if (!_formKey.currentState!.validate()) return;
@@ -89,6 +138,7 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
           category: _category,
           date: _date,
           notes: _notesController.text.trim(),
+          receiptUrl: _attachmentPath,
           type: _isIncome ? 'income' : 'expense',
         );
     if (!mounted) return;
@@ -233,30 +283,8 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
               ),
               const SizedBox(height: 24),
 
-              // ATTACHMENT (placeholder — not wired to storage yet)
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('File upload coming soon')),
-                  ),
-                  icon: Icon(Icons.upload_file_rounded,
-                      size: 20, color: colors.primary),
-                  label: Text(
-                    'Attach Receipt / File',
-                    style: AppTextStyles.text
-                        .copyWith(fontWeight: FontWeight.w700),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: colors.primary,
-                    side: BorderSide(
-                        color: colors.primary.withValues(alpha: 0.4)),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14)),
-                  ),
-                ),
-              ),
+              // ATTACHMENT (camera / gallery → stored on-device)
+              _buildAttachment(),
               const SizedBox(height: 24),
 
               // SAVE
@@ -286,6 +314,112 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAttachment() {
+    final colors = context.colors;
+    final path = _attachmentPath;
+    final hasImage = path != null && File(path).existsSync();
+
+    if (hasImage) {
+      return Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: colors.inputFill,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: colors.primary.withValues(alpha: 0.3)),
+        ),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.file(
+                File(path),
+                width: 56,
+                height: 56,
+                fit: BoxFit.cover,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Attachment added',
+                    style: AppTextStyles.title.copyWith(
+                      color: colors.textPrimary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      _attachmentAction(
+                        'Replace',
+                        Icons.swap_horiz_rounded,
+                        _chooseAttachment,
+                      ),
+                      const SizedBox(width: 18),
+                      _attachmentAction(
+                        'Remove',
+                        Icons.delete_outline_rounded,
+                        _removeAttachment,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: _chooseAttachment,
+        icon: Icon(Icons.add_a_photo_rounded, size: 20, color: colors.primary),
+        label: Text(
+          'Attach Receipt / Photo',
+          style: AppTextStyles.text.copyWith(fontWeight: FontWeight.w700),
+        ),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: colors.primary,
+          side: BorderSide(color: colors.primary.withValues(alpha: 0.4)),
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        ),
+      ),
+    );
+  }
+
+  Widget _attachmentAction(String label, IconData icon, VoidCallback onTap) {
+    final colors = context.colors;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 2),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 16, color: colors.primary),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: AppTextStyles.text.copyWith(
+                color: colors.primary,
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
         ),
       ),
     );

@@ -46,6 +46,9 @@ dependencies:
   fl_chart: ^1.2.0
   # Formatting
   intl: ^0.20.3
+  # Receipt/photo capture & on-device file storage for attachments
+  image_picker: ^1.1.2
+  path_provider: ^2.1.6
 
 dev_dependencies:
   flutter_test:

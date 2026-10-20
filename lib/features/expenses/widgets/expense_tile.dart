@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import '../../../config/theme.dart';
 import '../../../models/expense.dart';
@@ -37,6 +39,14 @@ class ExpenseTile extends StatelessWidget {
     final income = expense.isIncome;
     final c = context.colors;
 
+    // The receipt/photo is stored on-device; show it when the file still exists.
+    final path = expense.receiptUrl;
+    final File? imageFile =
+        (path != null && path.isNotEmpty && File(path).existsSync())
+            ? File(path)
+            : null;
+    final notes = expense.notes.trim();
+
     return Material(
       color: c.card,
       borderRadius: BorderRadius.circular(14),
@@ -49,12 +59,17 @@ class ExpenseTile extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 22,
-                backgroundColor: income ? c.income : c.expense,
-                child: Icon(
-                  Categories.iconFor(expense.category),
-                  color: c.onAccent,
-                  size: 22,
-                ),
+                backgroundColor:
+                    imageFile != null ? c.inputFill : (income ? c.income : c.expense),
+                backgroundImage:
+                    imageFile != null ? FileImage(imageFile) : null,
+                child: imageFile == null
+                    ? Icon(
+                        Categories.iconFor(expense.category),
+                        color: c.onAccent,
+                        size: 22,
+                      )
+                    : null,
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -77,6 +92,20 @@ class ExpenseTile extends StatelessWidget {
                         fontSize: 12,
                       ),
                     ),
+                    if (notes.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: Text(
+                          notes,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyles.text.copyWith(
+                            color: c.textSecondary,
+                            fontSize: 12,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),
