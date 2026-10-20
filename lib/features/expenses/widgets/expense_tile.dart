@@ -28,8 +28,18 @@ class ExpenseTile extends StatelessWidget {
 
   String _date(DateTime d) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return '${months[d.month - 1]} ${d.day}, ${d.year}';
   }
@@ -38,13 +48,14 @@ class ExpenseTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final income = expense.isIncome;
     final c = context.colors;
+    final categoryColor = Categories.colorFor(expense.category);
 
     // The receipt/photo is stored on-device; show it when the file still exists.
     final path = expense.receiptUrl;
     final File? imageFile =
         (path != null && path.isNotEmpty && File(path).existsSync())
-            ? File(path)
-            : null;
+        ? File(path)
+        : null;
     final notes = expense.notes.trim();
 
     return Material(
@@ -59,14 +70,16 @@ class ExpenseTile extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 22,
-                backgroundColor:
-                    imageFile != null ? c.inputFill : (income ? c.income : c.expense),
-                backgroundImage:
-                    imageFile != null ? FileImage(imageFile) : null,
+                backgroundColor: imageFile != null
+                    ? c.inputFill
+                    : categoryColor.withValues(alpha: 0.18),
+                backgroundImage: imageFile != null
+                    ? FileImage(imageFile)
+                    : null,
                 child: imageFile == null
                     ? Icon(
                         Categories.iconFor(expense.category),
-                        color: c.onAccent,
+                        color: categoryColor,
                         size: 22,
                       )
                     : null,

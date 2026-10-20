@@ -44,7 +44,8 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
   DateTime _date = DateTime.now();
   String? _attachmentPath;
 
-  Color get _accent => _isIncome ? context.colors.income : context.colors.expense;
+  Color get _accent =>
+      _isIncome ? context.colors.income : context.colors.expense;
 
   @override
   void dispose() {
@@ -62,7 +63,8 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
       // Drop a date that is no longer valid for the newly selected type.
       final today = DateUtils.dateOnly(DateTime.now());
       final date = DateUtils.dateOnly(_date);
-      if ((!income && date.isAfter(today)) || (income && date.isBefore(today))) {
+      if ((!income && date.isAfter(today)) ||
+          (income && date.isBefore(today))) {
         _date = today;
       }
     });
@@ -133,14 +135,14 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
     final nav = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
     final ok = await context.read<ExpenseProvider>().add(
-          name: _nameController.text.trim(),
-          amount: double.parse(_amountController.text.trim()),
-          category: _category,
-          date: _date,
-          notes: _notesController.text.trim(),
-          receiptUrl: _attachmentPath,
-          type: _isIncome ? 'income' : 'expense',
-        );
+      name: _nameController.text.trim(),
+      amount: double.parse(_amountController.text.trim()),
+      category: _isIncome ? Categories.other : _category,
+      date: _date,
+      notes: _notesController.text.trim(),
+      receiptUrl: _attachmentPath,
+      type: _isIncome ? 'income' : 'expense',
+    );
     if (!mounted) return;
     if (ok) {
       nav.pop();
@@ -169,7 +171,9 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
               Center(
                 child: Text(
                   'Add Transaction',
-                  style: AppTextStyles.subHeader.copyWith(color: colors.textPrimary),
+                  style: AppTextStyles.subHeader.copyWith(
+                    color: colors.textPrimary,
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
@@ -193,7 +197,9 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                 validator: (value) {
                   final text = value?.trim() ?? '';
                   if (text.isEmpty) {
-                    return _isIncome ? 'Income source is required' : 'Name is required';
+                    return _isIncome
+                        ? 'Income source is required'
+                        : 'Name is required';
                   }
                   return null;
                 },
@@ -222,17 +228,29 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                   borderRadius: BorderRadius.circular(14),
                   onTap: _pickDate,
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 16,
+                    ),
                     child: Row(
                       children: [
-                        Icon(Icons.calendar_today_rounded, color: colors.primary),
+                        Icon(
+                          Icons.calendar_today_rounded,
+                          color: colors.primary,
+                        ),
                         const SizedBox(width: 12),
                         Text(
                           _fmtDate(_date),
-                          style: AppTextStyles.title.copyWith(color: colors.textPrimary),
+                          style: AppTextStyles.title.copyWith(
+                            color: colors.textPrimary,
+                          ),
                         ),
                         const Spacer(),
-                        Icon(Icons.edit_rounded, size: 18, color: colors.primary),
+                        Icon(
+                          Icons.edit_rounded,
+                          size: 18,
+                          color: colors.primary,
+                        ),
                       ],
                     ),
                   ),
@@ -240,33 +258,47 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
               ),
               const SizedBox(height: 16),
 
-              // CATEGORY
-              DropdownButtonFormField<String>(
-                initialValue: _category,
-                isExpanded: true,
-                icon: Icon(Icons.arrow_drop_down_rounded, color: colors.primary),
-                style: AppTextStyles.title.copyWith(color: colors.textPrimary),
-                dropdownColor: colors.surface,
-                decoration: InputDecoration(
-                  labelText: 'Category',
-                  prefixIcon: Icon(Icons.category_rounded, color: colors.primary),
-                ),
-                items: [
-                  for (final c in Categories.all)
-                    DropdownMenuItem(
-                      value: c,
-                      child: Row(
-                        children: [
-                          Icon(Categories.iconFor(c), size: 20, color: colors.primary),
-                          const SizedBox(width: 10),
-                          Text(c),
-                        ],
-                      ),
+              // CATEGORY (expenses only — income has no category)
+              if (!_isIncome) ...[
+                DropdownButtonFormField<String>(
+                  initialValue: _category,
+                  isExpanded: true,
+                  icon: Icon(
+                    Icons.arrow_drop_down_rounded,
+                    color: colors.primary,
+                  ),
+                  style: AppTextStyles.title.copyWith(
+                    color: colors.textPrimary,
+                  ),
+                  dropdownColor: colors.surface,
+                  decoration: InputDecoration(
+                    labelText: 'Category',
+                    prefixIcon: Icon(
+                      Icons.category_rounded,
+                      color: colors.primary,
                     ),
-                ],
-                onChanged: (c) => setState(() => _category = c ?? _category),
-              ),
-              const SizedBox(height: 16),
+                  ),
+                  items: [
+                    for (final c in Categories.all)
+                      DropdownMenuItem(
+                        value: c,
+                        child: Row(
+                          children: [
+                            Icon(
+                              Categories.iconFor(c),
+                              size: 20,
+                              color: colors.primary,
+                            ),
+                            const SizedBox(width: 10),
+                            Text(c),
+                          ],
+                        ),
+                      ),
+                  ],
+                  onChanged: (c) => setState(() => _category = c ?? _category),
+                ),
+                const SizedBox(height: 16),
+              ],
 
               // NOTES
               TextFormField(
@@ -298,16 +330,20 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                     elevation: 0,
                     minimumSize: const Size.fromHeight(48),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24)),
-                    textStyle:
-                        AppTextStyles.title.copyWith(fontWeight: FontWeight.w700),
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    textStyle: AppTextStyles.title.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   child: saving
                       ? SizedBox(
                           width: 20,
                           height: 20,
                           child: CircularProgressIndicator(
-                              strokeWidth: 2.5, color: colors.onPrimary),
+                            strokeWidth: 2.5,
+                            color: colors.onPrimary,
+                          ),
                         )
                       : Text(_isIncome ? 'Add Income' : 'Add Expense'),
                 ),
@@ -393,7 +429,9 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
           foregroundColor: colors.primary,
           side: BorderSide(color: colors.primary.withValues(alpha: 0.4)),
           padding: const EdgeInsets.symmetric(vertical: 14),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
         ),
       ),
     );

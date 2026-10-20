@@ -118,16 +118,35 @@ class _BudgetSheetState extends State<_BudgetSheet> {
   late final TextEditingController _weekly;
   late final TextEditingController _monthly;
 
+  /// Values the fields were prefilled with, used to detect a real change so
+  /// the confirmation dialog is skipped when nothing was edited.
+  late final double _initialDaily;
+  late final double _initialWeekly;
+  late final double _initialMonthly;
+
   @override
   void initState() {
     super.initState();
     final b = context.read<BudgetProvider>().budget;
+    _initialDaily = b.daily;
+    _initialWeekly = b.weekly;
+    _initialMonthly = b.monthly;
     _daily = TextEditingController(text: _prefill(b.daily));
     _weekly = TextEditingController(text: _prefill(b.weekly));
     _monthly = TextEditingController(text: _prefill(b.monthly));
   }
 
   String _prefill(double v) => v > 0 ? v.toStringAsFixed(2) : '';
+
+  /// Formats a raw amount as `₱1,234.00`.
+  String _peso(double v) {
+    final parts = v.toStringAsFixed(2).split('.');
+    final whole = parts[0].replaceAllMapped(
+      RegExp(r'\B(?=(\d{3})+(?!\d))'),
+      (_) => ',',
+    );
+    return '₱$whole.${parts[1]}';
+  }
 
   @override
   void dispose() {
@@ -141,13 +160,67 @@ class _BudgetSheetState extends State<_BudgetSheet> {
     FocusScope.of(context).unfocus();
     if (!_formKey.currentState!.validate()) return;
 
+    final daily = double.parse(_daily.text.trim());
+    final weekly = double.parse(_weekly.text.trim());
+    final monthly = double.parse(_monthly.text.trim());
+
+    final colors = context.colors;
     final nav = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
+
+    // Only ask for confirmation when a value actually differs from what was
+    // loaded; a silent save keeps "Set Budget" from feeling repetitive.
+    if (daily != _initialDaily ||
+        weekly != _initialWeekly ||
+        monthly != _initialMonthly) {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text(
+            'Are you sure?',
+            style: AppTextStyles.title.copyWith(
+              color: colors.textPrimary,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          content: Text(
+            '${_peso(daily)} daily, ${_peso(weekly)} weekly, '
+            '${_peso(monthly)} monthly will be saved.',
+            style: AppTextStyles.text.copyWith(color: colors.textSecondary),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: Text(
+                'Cancel',
+                style: AppTextStyles.text.copyWith(
+                  color: colors.textSecondary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: Text(
+                'Save',
+                style: AppTextStyles.text.copyWith(
+                  color: colors.success,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true) return;
+      if (!mounted) return;
+    }
+
     final ok = await context.read<BudgetProvider>().save(
-          daily: double.parse(_daily.text.trim()),
-          weekly: double.parse(_weekly.text.trim()),
-          monthly: double.parse(_monthly.text.trim()),
-        );
+      daily: daily,
+      weekly: weekly,
+      monthly: monthly,
+    );
     if (!mounted) return;
     if (ok) {
       nav.pop();
@@ -177,8 +250,9 @@ class _BudgetSheetState extends State<_BudgetSheet> {
               Center(
                 child: Text(
                   hasBudget ? 'Edit Budget' : 'Set Budget',
-                  style: AppTextStyles.subHeader
-                      .copyWith(color: colors.textPrimary),
+                  style: AppTextStyles.subHeader.copyWith(
+                    color: colors.textPrimary,
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
@@ -204,8 +278,10 @@ class _BudgetSheetState extends State<_BudgetSheet> {
                 const SizedBox(height: 12),
                 Text(
                   error,
-                  style: AppTextStyles.text
-                      .copyWith(color: colors.error, fontSize: 13),
+                  style: AppTextStyles.text.copyWith(
+                    color: colors.error,
+                    fontSize: 13,
+                  ),
                 ),
               ],
               const SizedBox(height: 24),
@@ -219,16 +295,20 @@ class _BudgetSheetState extends State<_BudgetSheet> {
                     elevation: 0,
                     minimumSize: const Size.fromHeight(48),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24)),
-                    textStyle: AppTextStyles.title
-                        .copyWith(fontWeight: FontWeight.w700),
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    textStyle: AppTextStyles.title.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   child: saving
                       ? SizedBox(
                           width: 20,
                           height: 20,
                           child: CircularProgressIndicator(
-                              strokeWidth: 2.5, color: colors.onAccent),
+                            strokeWidth: 2.5,
+                            color: colors.onAccent,
+                          ),
                         )
                       : Text(hasBudget ? 'Save Changes' : 'Set Budget'),
                 ),
